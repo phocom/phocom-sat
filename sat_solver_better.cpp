@@ -7,21 +7,21 @@
 
 using namespace std;
 
-int N, M;                       // •Ï”‚Ì”Aß‚Ì”
-vector<array<int, 3>> clauses;  // “ü—Í‚Ìcnf
-vector<int> assigns, answer;  // Œ»İ‚ÌŠ„‚è“–‚ÄA”­Œ©‚³‚ê‚½[‘«Š„‚è“–‚Ä
-vector<int> satisfy_count;  // ‚»‚Ìß‚É^‚ÌƒŠƒeƒ‰ƒ‹‚ª‚¢‚­‚Â‘¶İ‚·‚é‚©
-vector<int> rest;  // ‚»‚Ìß‚É–¢Š„‚è“–‚Ä‚Ì•Ï”‚ª‚¢‚­‚Â‘¶İ‚·‚é‚©
+int N, M;                       // å¤‰æ•°ã®æ•°ã€ç¯€ã®æ•°
+vector<array<int, 3>> clauses;  // å…¥åŠ›ã®cnf
+vector<int> assigns, answer;  // ç¾åœ¨ã®å‰²ã‚Šå½“ã¦ã€ç™ºè¦‹ã•ã‚ŒãŸå……è¶³å‰²ã‚Šå½“ã¦
+vector<int> satisfy_count;  // ãã®ç¯€ã«çœŸã®ãƒªãƒ†ãƒ©ãƒ«ãŒã„ãã¤å­˜åœ¨ã™ã‚‹ã‹
+vector<int> rest;  // ãã®ç¯€ã«æœªå‰²ã‚Šå½“ã¦ã®å¤‰æ•°ãŒã„ãã¤å­˜åœ¨ã™ã‚‹ã‹
 unordered_set<int>
-    rest_to_clauses[4];  // –¢Š„‚è“–‚Ä‚ÌƒŠƒeƒ‰ƒ‹‚Ì”->ß‚Ì”Ô†‚Ìˆê——
-unordered_set<int> satisfied;        // [‘«Ï‚İ‚Ìß‚Ì”Ô†‚Ìˆê——
-vector<vector<int>> lit_to_clauses;  // •Ï”->‚»‚ê‚ğŠÜ‚Şß‚Ì”Ô†‚Ìˆê——
-vector<int> counts;                  // •Ï”->“ü—Í’†‚É“oê‚·‚é‰ñ”
+    rest_to_clauses[4];  // æœªå‰²ã‚Šå½“ã¦ã®ãƒªãƒ†ãƒ©ãƒ«ã®æ•°->ç¯€ã®ç•ªå·ã®ä¸€è¦§
+unordered_set<int> satisfied;        // å……è¶³æ¸ˆã¿ã®ç¯€ã®ç•ªå·ã®ä¸€è¦§
+vector<vector<int>> lit_to_clauses;  // å¤‰æ•°->ãã‚Œã‚’å«ã‚€ç¯€ã®ç•ªå·ã®ä¸€è¦§
+vector<int> counts;                  // å¤‰æ•°->å…¥åŠ›ä¸­ã«ç™»å ´ã™ã‚‹å›æ•°
 auto cmp = [](const int &l, const int &r) {
   return counts[l] == counts[r] ? l < r : counts[l] > counts[r];
 };
 set<int, function<bool(const int &, const int &)>> unassigned(
-    cmp);  // –¢Š„‚è“–‚Ä‚Ì•Ï”i“oê‚ª‘½‚¢‡‚É•À‚×‚éj
+    cmp);  // æœªå‰²ã‚Šå½“ã¦ã®å¤‰æ•°ï¼ˆç™»å ´ãŒå¤šã„é †ã«ä¸¦ã¹ã‚‹ï¼‰
 
 template <class T>
 string to_string(T s);
@@ -50,14 +50,14 @@ void debug(Head head, Tail... tail) {
   debug(tail...);
 }
 
-// lit‚ğŠ„‚è“–‚Ä
+// litã‚’å‰²ã‚Šå½“ã¦
 bool assign(int lit) {
   assigns[abs(lit)] = lit;
   unassigned.erase(abs(lit));
   bool ret = 1;
   for (int i : lit_to_clauses[abs(lit)]) {
     for (int j = 0; j < 3; ++j) {
-      bool not_yet = satisfy_count[i] == 0;  // ‚Ü‚¾[‘«‚³‚ê‚Ä‚¢‚È‚¢H
+      bool not_yet = satisfy_count[i] == 0;  // ã¾ã å……è¶³ã•ã‚Œã¦ã„ãªã„ï¼Ÿ
       if (lit == clauses[i][j]) {
         if (not_yet) rest_to_clauses[rest[i]].erase(i);
         rest[i]--;
@@ -67,7 +67,7 @@ bool assign(int lit) {
         if (not_yet) rest_to_clauses[rest[i]].erase(i);
         rest[i]--;
         if (not_yet) rest_to_clauses[rest[i]].insert(i);
-        if (not_yet && rest[i] == 0) {  // –µ‚”­¶
+        if (not_yet && rest[i] == 0) {  // çŸ›ç›¾ç™ºç”Ÿ
           ret = 0;
         }
       }
@@ -76,11 +76,11 @@ bool assign(int lit) {
   return ret;
 }
 
-// lit‚ÌŠ„‚è“–‚Ä‚ğæ‚èÁ‚·
+// litã®å‰²ã‚Šå½“ã¦ã‚’å–ã‚Šæ¶ˆã™
 void unassign(int lit) {
   for (int i : lit_to_clauses[abs(lit)]) {
     for (int j = 0; j < 3; ++j) {
-      bool not_yet = satisfy_count[i] == 0;  // ‚Ü‚¾[‘«‚³‚ê‚Ä‚¢‚È‚¢H
+      bool not_yet = satisfy_count[i] == 0;  // ã¾ã å……è¶³ã•ã‚Œã¦ã„ãªã„ï¼Ÿ
       if (lit == clauses[i][j]) {
         rest[i]++;
         satisfy_count[i]--;
@@ -99,10 +99,10 @@ void unassign(int lit) {
   assigns[abs(lit)] = 0;
 }
 
-// Ä‹A‚É‚æ‚é’Tõ
+// å†å¸°ã«ã‚ˆã‚‹æ¢ç´¢
 bool solve() {
-  vector<int> follow_list;  // ‚±‚ÌƒXƒeƒbƒv“à‚Å’PˆÊß‚Ì‚½‚ßŠ„‚è“–‚Ä‚½•Ï”‚Ìˆê——
-  while (!rest_to_clauses[1].empty()) {  // –¢Š„‚è“–‚Ä‚Ì•Ï”‚ª1‚Â‚Ì–¢[‘«‚Ìß‚É
+  vector<int> follow_list;  // ã“ã®ã‚¹ãƒ†ãƒƒãƒ—å†…ã§å˜ä½ç¯€ã®ãŸã‚å‰²ã‚Šå½“ã¦ãŸå¤‰æ•°ã®ä¸€è¦§
+  while (!rest_to_clauses[1].empty()) {  // æœªå‰²ã‚Šå½“ã¦ã®å¤‰æ•°ãŒ1ã¤ã®æœªå……è¶³ã®ç¯€ã«
     int i = *rest_to_clauses[1].begin();
     int lit = 0;
     for (int j = 0; j < 3; ++j)
@@ -112,15 +112,15 @@ bool solve() {
       }
     bool f = assign(lit);
     follow_list.push_back(lit);
-    if (!f) {  // Š„‚è“–‚Ä‚É¸”s
+    if (!f) {  // å‰²ã‚Šå½“ã¦ã«å¤±æ•—
       for (int l : follow_list) unassign(l);
-      return 0;  // ‘S‚Äæ‚èÁ‚µ‚Ä–ß‚é
+      return 0;  // å…¨ã¦å–ã‚Šæ¶ˆã—ã¦æˆ»ã‚‹
     }
   }
-  if (satisfied.size() == M) {  // ‘S‚Ä‚Ìß‚ğ[‘«‚µ‚½
+  if (satisfied.size() == M) {  // å…¨ã¦ã®ç¯€ã‚’å……è¶³ã—ãŸ
     answer = assigns;
     return 1;
-  } else {  // V‚½‚È•Ï”‚ğ•ªŠ„‚·‚é
+  } else {  // æ–°ãŸãªå¤‰æ•°ã‚’åˆ†å‰²ã™ã‚‹
     int next_select = *unassigned.begin();
     assign(next_select);
     bool ret1 = solve();
