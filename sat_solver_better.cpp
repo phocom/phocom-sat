@@ -1,9 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <set>
-#include <unordered_set>
-#include <functional>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -17,38 +12,11 @@ unordered_set<int>
 unordered_set<int> satisfied;        // 充足済みの節の番号の一覧
 vector<vector<int>> lit_to_clauses;  // 変数->それを含む節の番号の一覧
 vector<int> counts;                  // 変数->入力中に登場する回数
-auto cmp = [](const int &l, const int &r) {
+auto cmp = [&](const int &l, const int &r) {
   return counts[l] == counts[r] ? l < r : counts[l] > counts[r];
 };
 set<int, function<bool(const int &, const int &)>> unassigned(
     cmp);  // 未割り当ての変数（登場が多い順に並べる）
-
-template <class T>
-string to_string(T s);
-template <class S, class T>
-string to_string(pair<S, T> p);
-string to_string(string s) { return s; }
-string to_string(const char s[]) { return to_string(string(s)); }
-
-template <class T>
-string to_string(T v) {
-  if (v.empty()) return "{}";
-  string ret = "{";
-  for (auto x : v) ret += to_string(x) + ",";
-  ret.back() = '}';
-  return ret;
-}
-template <class S, class T>
-string to_string(pair<S, T> p) {
-  return "{" + to_string(p.first) + "," + to_string(p.second) + "}";
-}
-
-void debug() { cerr << endl; }
-template <class Head, class... Tail>
-void debug(Head head, Tail... tail) {
-  cerr << to_string(head) << " ";
-  debug(tail...);
-}
 
 // litを割り当て
 bool assign(int lit) {
@@ -168,21 +136,6 @@ int main(int argc, char *argv[]) {
   read_problem(argv[1]);
   bool ret = solve();
   if (ret) {
-    for (int i = 0; i < M; ++i) {
-      bool f = 0;
-      for (int j = 0; j < 3; ++j) {
-        if (answer[abs(clauses[i][j])] == clauses[i][j]) {
-          f = 1;
-        }
-      }
-      if (!f) {
-        cout << "BAD" << endl;
-        return 1;
-      } else {
-        cout << "OK" << endl;
-      }
-    }
-
     cout << "SAT" << endl;
     for (int i = 1; i <= N; ++i)
       cout << (answer[i] == 0 ? i : answer[i]) << " ";
